@@ -1,10 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Custom boutique styling base */
 @layer base {
   body {
-    @apply bg-white text-gray-900 antialiased;
+    background-color: #f9fafb;
+    color: #111827;
   }
 }
