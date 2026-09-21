@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import CartDrawer from "@/components/layout/CartDrawer";
 import Footer from "@/components/layout/Footer";
+import CartInitializer from "@/components/cart/CartInitializer";
 
 // Professional Font Pairing: Sans for UI, Serif for Brand/Headings
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
@@ -14,24 +15,10 @@ export const metadata: Metadata = {
   description: "Discover the latest trends in women's fashion at MALIK BRAND ZONE.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-gray-50 text-gray-900 min-h-screen flex flex-col`}>
-        <Navbar />
-
-        <main className="flex-grow">
-          {children}
-        </main>
-        <CartDrawer />
-        <Footer />
-
-        {/* Footer component will go here later */}
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
