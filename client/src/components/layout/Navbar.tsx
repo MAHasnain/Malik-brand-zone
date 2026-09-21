@@ -6,10 +6,14 @@ import { Menu, ShoppingBag, Search, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
+import HeaderSearch from './HeaderSearch';
 
 export default function Navbar() {
-    const { openCart, items } = useCartStore();
+    // Zustand Store State Integration Updated
+    const { openDrawer, cart } = useCartStore();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const totalItems = cart?.totalItems || 0;
 
     return (
         <>
@@ -26,7 +30,7 @@ export default function Navbar() {
                             <Menu className="h-6 w-6 text-gray-800" />
                         </button>
                         <Link href="/" className="text-2xl font-serif font-bold tracking-widest text-gray-900">
-                            <Image src="/MBZ-black.png" alt="Brand Logo" width={60} height={60} />
+                            <Image src="/MBZ-black.png" alt="Brand Logo" width={60} height={60} priority />
                         </Link>
                     </div>
 
@@ -48,14 +52,16 @@ export default function Navbar() {
 
                     {/* Right: Action Icons (Search & Cart) */}
                     <div className="flex items-center justify-end gap-5 flex-1">
-                        <button className="p-1 hover:opacity-70 transition-opacity" aria-label="Search">
-                            <Search className="h-5 w-5 text-gray-800" />
-                        </button>
-                        <button onClick={openCart} className="relative p-1 hover:opacity-70 transition-opacity" aria-label="Cart">
+                        <div className="flex items-center gap-4">
+                            <HeaderSearch />
+                        </div>
+
+                        {/* Trigger Cart Drawer */}
+                        <button onClick={openDrawer} className="relative p-1 hover:opacity-70 transition-opacity" aria-label="Cart">
                             <ShoppingBag className="h-6 w-6 text-gray-800" />
-                            {items.length > 0 && (
+                            {totalItems > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">
-                                    {items.length}
+                                    {totalItems}
                                 </span>
                             )}
                         </button>
@@ -63,6 +69,7 @@ export default function Navbar() {
                 </div>
             </header>
 
+            {/* Mobile Drawer Navigation */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
