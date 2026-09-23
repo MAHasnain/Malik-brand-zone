@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@/lib/axios';
 import { getOrCreateSessionId } from '@/utils/session';
+import { AxiosError } from 'axios';
 
 export interface ICartItem {
   _id: string;
@@ -45,7 +46,7 @@ interface CartStoreState {
   clearCart: () => Promise<void>;
 }
 
-export const useCartStore = create<CartStoreState>((set, get) => ({
+export const useCartStore = create<CartStoreState>((set) => ({
   cart: null,
   isLoading: false,
   isDrawerOpen: false,
@@ -87,11 +88,13 @@ export const useCartStore = create<CartStoreState>((set, get) => ({
       });
 
       if (response.data?.data) {
-        set({ cart: response.data.data, isDrawerOpen: true }); // Cart add hone par automatically drawer slide-in hoga
+        set({ cart: response.data.data , isDrawerOpen: true });
+
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as AxiosError<{message?: string}>;
       console.error('Error adding to cart:', error);
-      alert(error.response?.data?.message || 'Failed to add item to cart');
+      alert(err.response?.data?.message || 'Failed to add item to cart');
     } finally {
       set({ isLoading: false });
     }
@@ -110,9 +113,10 @@ export const useCartStore = create<CartStoreState>((set, get) => ({
       if (response.data?.data) {
         set({ cart: response.data.data });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as AxiosError<{message?: string}>;
       console.error('Error updating cart quantity:', error);
-      alert(error.response?.data?.message || 'Failed to update quantity');
+      alert(err.response?.data?.message || 'Failed to update quantity');
     }
   },
 
@@ -128,9 +132,10 @@ export const useCartStore = create<CartStoreState>((set, get) => ({
       if (response.data?.data) {
         set({ cart: response.data.data });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as AxiosError<{message?: string}>;
       console.error('Error removing item from cart:', error);
-      alert(error.response?.data?.message || 'Failed to remove item');
+      alert(err.response?.data?.message || 'Failed to remove item');
     }
   },
 
@@ -140,7 +145,7 @@ export const useCartStore = create<CartStoreState>((set, get) => ({
       const sessionId = getOrCreateSessionId();
       await api.post('/cart/clear', { sessionId });
       set({ cart: { items: [], totalPrice: 0, totalItems: 0 } });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error clearing cart:', error);
     }
   },

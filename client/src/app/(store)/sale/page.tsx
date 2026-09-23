@@ -125,7 +125,7 @@ export default function SalePage() {
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-100 rounded-lg aspect-[3/4] w-full" />
+            <div key={i} className="animate-pulse bg-gray-100 rounded-lg aspect-3/4 w-full" />
           ))}
         </div>
       ) : filteredProducts.length === 0 ? (

@@ -40,7 +40,7 @@ export default async function WomenCategoryPage({ searchParams }: PageProps) {
           Catalog
         </span>
         <h1 className="text-3xl md:text-4xl font-serif tracking-tight text-gray-900 mb-2">
-          Women's Collection
+          Women&apos;s Collection
         </h1>
         <p className="text-gray-500 text-sm max-w-xl">
           Discover the latest arrivals in luxury lawn, silk, and unstitched pret tailored to perfection.
@@ -81,7 +81,7 @@ export default async function WomenCategoryPage({ searchParams }: PageProps) {
       <div className="flex flex-col lg:flex-row items-start gap-8 relative">
         {/* Left Sidebar (Filters) */}
         <div className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24">
-          <FilterSidebar categories={categories} />
+          <FilterSidebar />
         </div>
 
         {/* Right Side (Dynamic Product Grid) */}
