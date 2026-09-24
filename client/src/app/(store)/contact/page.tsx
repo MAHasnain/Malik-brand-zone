@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone, Instagram, Facebook, MessageCircle } from 'lucide-react';
+import { Mail, MapPin, Phone} from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 
 export default function ContactPage() {
@@ -47,7 +47,7 @@ export default function ContactPage() {
                             <MapPin className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
                             <div>
                                 <h4 className="font-medium text-gray-900 mb-1">Store Location</h4>
-                                <p className="text-gray-500 text-sm">123 Fashion Avenue, Boutique District<br />Karachi, Pakistan</p>
+                                <p className="text-gray-500 text-sm">Ghareeb Nawaz Market Rd, Sector 33/E korangi 2.5<br />Karachi, Pakistan</p>
                             </div>
                         </div>
 
@@ -55,7 +55,7 @@ export default function ContactPage() {
                             <Phone className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
                             <div>
                                 <h4 className="font-medium text-gray-900 mb-1">Phone & WhatsApp</h4>
-                                <p className="text-gray-500 text-sm">+92 300 1234567<br />Mon-Sat, 10:00 AM - 8:00 PM</p>
+                                <p className="text-gray-500 text-sm">+92 317 2888917 <br />Mon-Sun, 10:00 AM - 8:00 PM</p>
                             </div>
                         </div>
 
@@ -63,7 +63,7 @@ export default function ContactPage() {
                             <Mail className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
                             <div>
                                 <h4 className="font-medium text-gray-900 mb-1">Email Support</h4>
-                                <p className="text-gray-500 text-sm">support@banani.pk</p>
+                                <p className="text-gray-500 text-sm">malikbrandzone.store@gmail.com</p>
                             </div>
                         </div>
                     </div>
@@ -71,17 +71,17 @@ export default function ContactPage() {
                     <div className="mt-12 pt-12 border-t border-gray-100">
                         <h4 className="font-medium text-gray-900 mb-6">Connect with Us</h4>
                         <div className="grid grid-cols-2 gap-4">
-                            <a href="#" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
-                                <FaInstagram className="w-5 h-5 text-pink-600" /> @banani.official
+                            <a href="https://www.instagram.com/malikadnanbrandhouse" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
+                                <FaInstagram className="w-5 h-5 text-pink-600" /> @malikadnanbrandhouse
                             </a>
-                            <a href="#" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
-                                <FaWhatsapp className="w-5 h-5 text-green-600" /> WhatsApp Chat
+                            <a href="https://wa.me/923172888917" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
+                                <FaWhatsapp className="w-5 h-5 text-green-600" />WhatsApp Chat
                             </a>
-                            <a href="#" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
-                                <FaFacebook className="w-5 h-5 text-blue-600" /> Banani Store
+                            <a href="https://www.facebook.com/share/p/1ALQdx1T2V/" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
+                                <FaFacebook className="w-5 h-5 text-blue-600" />Malik Adnan Brand House
                             </a>
-                            <a href="#" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
-                                <FaTiktok className="w-5 h-5 text-black" /> Banani Tok
+                            <a href="https://www.tiktok.com/@malikbrotherbrandzone" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
+                                <FaTiktok className="w-5 h-5 text-black" />Malik brother brand zone
                             </a>
                         </div>
                     </div>
