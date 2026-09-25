@@ -1,152 +1,110 @@
-import { create } from 'zustand';
-import { api } from '@/lib/axios';
-import { getOrCreateSessionId } from '@/utils/session';
-import { AxiosError } from 'axios';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { create } from "zustand";
+import { api } from "@/lib/axios";
+import { IProduct } from "@/types";
 
 export interface ICartItem {
-  _id: string;
-  product: {
-    _id: string;
-    title: string;
-    images: string[];
-    price: number;
-    discountPrice?: number;
-    slug: string;
-    stock: number;
-  };
-  selectedSize?: string;
-  selectedColor?: string;
+  product: IProduct;
+  size: string;
+  color: string;
   quantity: number;
-  priceAtAddition: number;
-}
-
-export interface ICart {
-  _id?: string;
-  sessionId?: string;
-  items: ICartItem[];
-  totalPrice: number;
-  totalItems: number;
 }
 
 interface CartStoreState {
-  cart: ICart | null;
-  isLoading: boolean;
-  isDrawerOpen: boolean;
-  
-  // Actions
-  openDrawer: () => void;
-  closeDrawer: () => void;
-  toggleDrawer: () => void;
-  
-  // API Calls
-  fetchCart: () => Promise<void>;
-  addToCart: (productId: string, size?: string, color?: string, quantity?: number) => Promise<void>;
+  cart: {
+    items: ICartItem[];
+    totalPrice: number;
+    totalItems: number;
+  } | null;
+  loading: boolean;
+  addToCart: (item: { product: IProduct; size: string; color: string; quantity: number }) => void;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
 }
 
+const getOrCreateSessionId = (): string => {
+  if (typeof window === "undefined") return "";
+  let sessionId = localStorage.getItem("cart_session_id");
+  if (!sessionId) {
+    sessionId = "session_" + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem("cart_session_id", sessionId);
+  }
+  return sessionId;
+};
+
 export const useCartStore = create<CartStoreState>((set) => ({
   cart: null,
-  isLoading: false,
-  isDrawerOpen: false,
+  loading: false,
 
-  openDrawer: () => set({ isDrawerOpen: true }),
-  closeDrawer: () => set({ isDrawerOpen: false }),
-  toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
-
-  // 1. Fetch Cart from Backend
-  fetchCart: async () => {
-    set({ isLoading: true });
+  addToCart: async ({ product, size, color, quantity }) => {
     try {
       const sessionId = getOrCreateSessionId();
-      if (!sessionId) return;
-
-      const response = await api.get(`/cart?sessionId=${sessionId}`);
-      
-      if (response.data?.data) {
-        set({ cart: response.data.data });
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  // 2. Add Item to Cart
-  addToCart: async (productId, size, color, quantity = 1) => {
-    set({ isLoading: true });
-    try {
-      const sessionId = getOrCreateSessionId();
-      const response = await api.post('/cart/add', {
-        productId,
+      const response = await api.post("/cart/add", {
+        productId: product._id,
         size,
         color,
         quantity,
         sessionId,
       });
 
-      if (response.data?.data) {
-        set({ cart: response.data.data , isDrawerOpen: true });
-
+      const resData = response.data as Record<string, any>;
+      if (resData?.data) {
+        set({ cart: resData.data });
       }
     } catch (error: unknown) {
-      const err = error as AxiosError<{message?: string}>;
-      console.error('Error adding to cart:', error);
-      alert(err.response?.data?.message || 'Failed to add item to cart');
-    } finally {
-      set({ isLoading: false });
+      const err = error as Record<string, any>;
+      console.error("Error adding to cart:", error);
+      alert(err.response?.data?.message || "Failed to add item to cart");
     }
   },
 
-  // 3. Update Cart Item Quantity
-  updateQuantity: async (itemId, quantity) => {
+  updateQuantity: async (itemId: string, quantity: number) => {
     try {
       const sessionId = getOrCreateSessionId();
-      const response = await api.patch('/cart/update-qty', {
+      const response = await api.put("/cart/update", {
         itemId,
         quantity,
         sessionId,
       });
 
-      if (response.data?.data) {
-        set({ cart: response.data.data });
+      const resData = response.data as Record<string, any>;
+      if (resData?.data) {
+        set({ cart: resData.data });
       }
     } catch (error: unknown) {
-      const err = error as AxiosError<{message?: string}>;
-      console.error('Error updating cart quantity:', error);
-      alert(err.response?.data?.message || 'Failed to update quantity');
+      const err = error as Record<string, any>;
+      console.error("Error updating cart quantity:", error);
+      alert(err.response?.data?.message || "Failed to update quantity");
     }
   },
 
-  // 4. Remove Item from Cart
-  removeItem: async (itemId) => {
+  removeItem: async (itemId: string) => {
     try {
       const sessionId = getOrCreateSessionId();
-      const response = await api.post('/cart/remove', {
+      const response = await api.post("/cart/remove", {
         itemId,
         sessionId,
       });
 
-      if (response.data?.data) {
-        set({ cart: response.data.data });
+      const resData = response.data as Record<string, any>;
+      if (resData?.data) {
+        set({ cart: resData.data });
       }
     } catch (error: unknown) {
-      const err = error as AxiosError<{message?: string}>;
-      console.error('Error removing item from cart:', error);
-      alert(err.response?.data?.message || 'Failed to remove item');
+      const err = error as Record<string, any>;
+      console.error("Error removing item from cart:", error);
+      alert(err.response?.data?.message || "Failed to remove item");
     }
   },
 
-  // 5. Clear Entire Cart
   clearCart: async () => {
     try {
       const sessionId = getOrCreateSessionId();
-      await api.post('/cart/clear', { sessionId });
+      await api.post("/cart/clear", { sessionId });
       set({ cart: { items: [], totalPrice: 0, totalItems: 0 } });
     } catch (error: unknown) {
-      console.error('Error clearing cart:', error);
+      console.error("Error clearing cart:", error);
     }
   },
 }));
