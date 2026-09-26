@@ -17,7 +17,13 @@ interface CartStoreState {
     totalItems: number;
   } | null;
   loading: boolean;
-  addToCart: (item: { product: IProduct; size: string; color: string; quantity: number }) => void;
+  // Flexible signature to accept either object or positional arguments
+  addToCart: (
+    itemOrProduct: any,
+    size?: string,
+    color?: string,
+    quantity?: number
+  ) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -37,14 +43,32 @@ export const useCartStore = create<CartStoreState>((set) => ({
   cart: null,
   loading: false,
 
-  addToCart: async ({ product, size, color, quantity }) => {
+  addToCart: async (itemOrProduct: any, size?: string, color?: string, quantity: number = 1) => {
     try {
+      let productObj: IProduct;
+      let selectedSize = size || "";
+      let selectedColor = color || "";
+      let qty = quantity;
+
+      // Handle if passed as Object { product, size, color, quantity }
+      if (itemOrProduct && typeof itemOrProduct === "object" && "product" in itemOrProduct) {
+        productObj = itemOrProduct.product;
+        selectedSize = itemOrProduct.size || selectedSize;
+        selectedColor = itemOrProduct.color || selectedColor;
+        qty = itemOrProduct.quantity || qty;
+      } else {
+        // Handle if passed directly as Product object or ID
+        productObj = itemOrProduct;
+      }
+
+      const productId = productObj?._id || productObj;
       const sessionId = getOrCreateSessionId();
+
       const response = await api.post("/cart/add", {
-        productId: product._id,
-        size,
-        color,
-        quantity,
+        productId,
+        size: selectedSize,
+        color: selectedColor,
+        quantity: qty,
         sessionId,
       });
 
