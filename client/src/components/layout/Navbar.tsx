@@ -2,18 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, ShoppingBag, Search, X } from 'lucide-react';
+import { Menu, ShoppingBag, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import HeaderSearch from './HeaderSearch';
 
 export default function Navbar() {
-    // Zustand Store State Integration Updated
-    const { openDrawer, cart } = useCartStore();
+
+    const { openCart, cart } = useCartStore();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const totalItems = cart?.totalItems || 0;
+    const totalItems = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
     return (
         <>
@@ -57,7 +57,11 @@ export default function Navbar() {
                         </div>
 
                         {/* Trigger Cart Drawer */}
-                        <button onClick={openDrawer} className="relative p-1 hover:opacity-70 transition-opacity" aria-label="Cart">
+                        <button onClick={() => {
+                            console.log("Cart icon clicked");
+                            openCart();
+                        }}
+                            className="relative p-1 hover:opacity-70 transition-opacity cursor-pointer" aria-label="Cart">
                             <ShoppingBag className="h-6 w-6 text-gray-800" />
                             {totalItems > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">

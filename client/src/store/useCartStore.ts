@@ -17,7 +17,10 @@ interface CartStoreState {
     totalItems: number;
   } | null;
   loading: boolean;
-  // Flexible signature to accept either object or positional arguments
+  isOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
+  toggleCart: () => void;
   addToCart: (
     itemOrProduct: any,
     size?: string,
@@ -42,6 +45,11 @@ const getOrCreateSessionId = (): string => {
 export const useCartStore = create<CartStoreState>((set) => ({
   cart: null,
   loading: false,
+  isOpen: false, // Default hidden
+
+  openCart: () => set({ isOpen: true }),
+  closeCart: () => set({ isOpen: false }),
+  toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
 
   addToCart: async (itemOrProduct: any, size?: string, color?: string, quantity: number = 1) => {
     try {
@@ -50,14 +58,12 @@ export const useCartStore = create<CartStoreState>((set) => ({
       let selectedColor = color || "";
       let qty = quantity;
 
-      // Handle if passed as Object { product, size, color, quantity }
       if (itemOrProduct && typeof itemOrProduct === "object" && "product" in itemOrProduct) {
         productObj = itemOrProduct.product;
         selectedSize = itemOrProduct.size || selectedSize;
         selectedColor = itemOrProduct.color || selectedColor;
         qty = itemOrProduct.quantity || qty;
       } else {
-        // Handle if passed directly as Product object or ID
         productObj = itemOrProduct;
       }
 
@@ -74,51 +80,32 @@ export const useCartStore = create<CartStoreState>((set) => ({
 
       const resData = response.data as Record<string, any>;
       if (resData?.data) {
-        set({ cart: resData.data });
+        set({ cart: resData.data, isOpen: true }); // Automatically open drawer after adding!
       }
     } catch (error: unknown) {
-      const err = error as Record<string, any>;
       console.error("Error adding to cart:", error);
-      alert(err.response?.data?.message || "Failed to add item to cart");
     }
   },
 
   updateQuantity: async (itemId: string, quantity: number) => {
     try {
       const sessionId = getOrCreateSessionId();
-      const response = await api.put("/cart/update", {
-        itemId,
-        quantity,
-        sessionId,
-      });
-
+      const response = await api.put("/cart/update", { itemId, quantity, sessionId });
       const resData = response.data as Record<string, any>;
-      if (resData?.data) {
-        set({ cart: resData.data });
-      }
+      if (resData?.data) set({ cart: resData.data });
     } catch (error: unknown) {
-      const err = error as Record<string, any>;
       console.error("Error updating cart quantity:", error);
-      alert(err.response?.data?.message || "Failed to update quantity");
     }
   },
 
   removeItem: async (itemId: string) => {
     try {
       const sessionId = getOrCreateSessionId();
-      const response = await api.post("/cart/remove", {
-        itemId,
-        sessionId,
-      });
-
+      const response = await api.post("/cart/remove", { itemId, sessionId });
       const resData = response.data as Record<string, any>;
-      if (resData?.data) {
-        set({ cart: resData.data });
-      }
+      if (resData?.data) set({ cart: resData.data });
     } catch (error: unknown) {
-      const err = error as Record<string, any>;
       console.error("Error removing item from cart:", error);
-      alert(err.response?.data?.message || "Failed to remove item");
     }
   },
 
