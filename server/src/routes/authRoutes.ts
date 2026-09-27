@@ -7,6 +7,6 @@ const router = Router();
 router.post('/login', login);
 router.post('/refresh-token', refreshAccessToken);
 
-router.post('/logout', protectAdmin, logout);
+router.post('/logout', logout);
 
 export default router;
