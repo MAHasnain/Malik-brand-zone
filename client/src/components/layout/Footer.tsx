@@ -66,16 +66,16 @@ export default function Footer() {
                     </p>
                     
                     <div className="flex gap-5">
-                        <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                        <a href="https://www.instagram.com/malikadnanbrandhouse" className="text-gray-400 hover:text-black transition-colors">
                             <FaInstagram className="w-5 h-5" />
                         </a>
-                        <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                        <a href="https://www.facebook.com/people/Malik-Adnan-Brand-House/pfbid0i7nraC7MnUT8qZDcsfww2WWy4sw9VcTHcqsaFx29fvLcDzNoFeyLL2FdW9GKj8zcl/" className="text-gray-400 hover:text-black transition-colors">
                             <FaFacebook className="w-5 h-5" />
                         </a>
-                        <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                        <a href="https://www.tiktok.com/@malikbrotherbrandzone" className="text-gray-400 hover:text-black transition-colors">
                             <FaTiktok className="w-5 h-5" />
                         </a>
-                        <a href="#" className="text-gray-400 hover:text-green-600 transition-colors">
+                        <a href="https://wa.me/923172888917" className="text-gray-400 hover:text-green-600 transition-colors">
                             <FaWhatsapp className="w-5 h-5" />
                         </a>
                     </div>

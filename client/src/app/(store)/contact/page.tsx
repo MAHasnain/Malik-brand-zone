@@ -77,7 +77,7 @@ export default function ContactPage() {
                             <a href="https://wa.me/923172888917" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
                                 <FaWhatsapp className="w-5 h-5 text-green-600" />WhatsApp Chat
                             </a>
-                            <a href="https://www.facebook.com/share/p/1ALQdx1T2V/" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
+                            <a href="https://www.facebook.com/people/Malik-Adnan-Brand-House/pfbid0i7nraC7MnUT8qZDcsfww2WWy4sw9VcTHcqsaFx29fvLcDzNoFeyLL2FdW9GKj8zcl/" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
                                 <FaFacebook className="w-5 h-5 text-blue-600" />Malik Adnan Brand House
                             </a>
                             <a href="https://www.tiktok.com/@malikbrotherbrandzone" className="flex items-center gap-3 text-gray-500 hover:text-black transition-colors text-sm border border-gray-100 p-4 bg-gray-50 hover:bg-white">
