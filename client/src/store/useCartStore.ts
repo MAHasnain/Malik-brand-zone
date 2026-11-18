@@ -18,6 +18,7 @@ interface CartStoreState {
   } | null;
   loading: boolean;
   isOpen: boolean;
+  fetchCart: () => Promise<void>;
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
@@ -47,6 +48,16 @@ export const useCartStore = create<CartStoreState>((set) => ({
   loading: false,
   isOpen: false, // Default hidden
 
+  fetchCart: async () => {
+    const sessionId = localStorage.getItem("cart_session_id");
+    if (!sessionId) return;
+    try {
+      const { data } = await api.get<{ data: CartStoreState["cart"] }>("/cart", { params: { sessionId } });
+      set((state) => state.cart === null ? { cart: data.data } : state);
+    } catch (error) {
+      console.error("Could not load cart", error);
+    }
+  },
   openCart: () => set({ isOpen: true }),
   closeCart: () => set({ isOpen: false }),
   toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
@@ -90,7 +101,7 @@ export const useCartStore = create<CartStoreState>((set) => ({
   updateQuantity: async (itemId: string, quantity: number) => {
     try {
       const sessionId = getOrCreateSessionId();
-      const response = await api.put("/cart/update", { itemId, quantity, sessionId });
+      const response = await api.patch("/cart/update-qty", { itemId, quantity, sessionId });
       const resData = response.data as Record<string, any>;
       if (resData?.data) set({ cart: resData.data });
     } catch (error: unknown) {

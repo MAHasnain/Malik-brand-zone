@@ -5,6 +5,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 export interface ProductQueryParams {
   category?: string;
   search?: string;
+  fabric?: string;
+  sizes?: string;
   isFeatured?: boolean;
   minPrice?: number;
   maxPrice?: number;
@@ -18,6 +20,8 @@ export async function getProducts(params?: ProductQueryParams): Promise<IProduct
     const query = new URLSearchParams();
 
     if (params?.category) query.append("category", params.category);
+    if (params?.fabric) query.set("fabric", params.fabric);
+    if (params?.sizes) query.set("sizes", params.sizes);
     if (params?.search) query.append("search", params.search);
     if (params?.isFeatured !== undefined) query.append("isFeatured", String(params.isFeatured));
     if (params?.minPrice) query.append("minPrice", String(params.minPrice));
@@ -33,7 +37,8 @@ export async function getProducts(params?: ProductQueryParams): Promise<IProduct
     const result = await res.json();
     
     // Backend returns either array directly or paginated object { products, total }
-    return result?.data?.products || result?.data || [];
+    const products = result?.data?.products ?? result?.data ?? result;
+    return Array.isArray(products) ? products : [];
   } catch (error) {
     console.error("getProducts Error:", error);
     return [];
@@ -94,7 +99,8 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<I
     });
     if (!res.ok) throw new Error("Failed to fetch category products");
     const result = await res.json();
-    return result?.data?.products || result?.data || [];
+    const products = result?.data?.products ?? result?.data ?? result;
+    return Array.isArray(products) ? products : [];
   } catch (error) {
     console.error("getProductsByCategorySlug Error:", error);
     return [];

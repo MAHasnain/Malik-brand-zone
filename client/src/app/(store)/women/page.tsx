@@ -8,6 +8,8 @@ interface PageProps {
   searchParams: Promise<{
     category?: string;
     search?: string;
+    fabric?: string;
+    size?: string;
     minPrice?: string;
     maxPrice?: string;
   }>;
@@ -22,12 +24,18 @@ export default async function WomenCategoryPage({ searchParams }: PageProps) {
     (c) => c.name.toLowerCase() === "women" || c.slug === "women"
   );
 
-  const activeCategoryId = resolvedParams.category || womenCategory?._id;
+  const selected = categories.find((category) =>
+    [category.slug, category._id].includes(resolvedParams.category ?? "")
+  );
+  const activeSlug = selected?.slug || resolvedParams.category || (resolvedParams.search ? undefined : womenCategory?.slug);
+  const heading = resolvedParams.search ? "Search results" : selected ? selected.name : "Women’s collection";
 
   // Fetch real products from MongoDB
   const products = await getProducts({
-    category: activeCategoryId,
+    category: activeSlug,
     search: resolvedParams.search,
+    fabric: resolvedParams.fabric,
+    sizes: resolvedParams.size,
     minPrice: resolvedParams.minPrice ? Number(resolvedParams.minPrice) : undefined,
     maxPrice: resolvedParams.maxPrice ? Number(resolvedParams.maxPrice) : undefined,
   });
@@ -40,10 +48,10 @@ export default async function WomenCategoryPage({ searchParams }: PageProps) {
           Catalog
         </span>
         <h1 className="text-3xl md:text-4xl font-serif tracking-tight text-gray-900 mb-2">
-          Women&apos;s Collection
+          {heading}
         </h1>
         <p className="text-gray-500 text-sm max-w-xl">
-          Discover the latest arrivals in luxury lawn, silk, and unstitched pret tailored to perfection.
+          {resolvedParams.search ? `Results for “${resolvedParams.search}”` : "Browse clothing by category, fabric and size."}
         </p>
       </div>
 
@@ -60,11 +68,11 @@ export default async function WomenCategoryPage({ searchParams }: PageProps) {
           All Women
         </Link>
         {categories.map((cat) => {
-          const isActive = resolvedParams.category === cat._id;
+          const isActive = selected?._id === cat._id;
           return (
             <Link
               key={cat._id}
-              href={`/women?category=${cat._id}`}
+              href={`/women?category=${encodeURIComponent(cat.slug)}`}
               className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wider uppercase transition-all whitespace-nowrap border ${
                 isActive
                   ? "bg-black text-white border-black shadow-sm"

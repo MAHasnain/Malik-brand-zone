@@ -67,9 +67,7 @@ export default function FilterSidebar() {
                             const isChecked = searchParams.get("fabric")?.split(",").includes(fabric);
                             return (
                                 <label key={fabric} className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-4 h-4 border flex items-center justify-center transition-colors ${isChecked ? 'bg-black border-black' : 'border-gray-300 group-hover:border-black'}`}>
-                                        {isChecked && <div className="w-2 h-2 bg-white" />}
-                                    </div>
+                                    <input type="checkbox" checked={!!isChecked} onChange={() => handleFilterChange("fabric", fabric)} className="size-4 accent-stone-800" />
                                     <span className="text-sm text-gray-700">{fabric}</span>
                                 </label>
                             );

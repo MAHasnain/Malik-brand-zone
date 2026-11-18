@@ -12,7 +12,7 @@ export default async function TrendingProducts() {
 
                 <div className="flex justify-between items-end mb-10">
                     <div>
-                        <h2 className="text-3xl font-serif text-gray-900 mb-2">New Arrivals</h2>
+                        <h2 className="mbz-heading">New Arrivals</h2>
                         <p className="text-gray-500 text-sm">Handpicked selections for the season.</p>
                     </div>
                     <Link href="/new-arrivals" className="hidden sm:block text-sm font-medium underline underline-offset-4 hover:text-gray-600">

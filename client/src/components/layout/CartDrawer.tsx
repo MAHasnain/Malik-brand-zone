@@ -53,8 +53,9 @@ export default function CartDrawer() {
                 </span>
               </div>
               <button
+                aria-label="Close cart"
                 onClick={closeCart}
-                className="p-1.5 text-gray-400 hover:text-black rounded-lg transition"
+                className="grid size-11 place-items-center text-gray-400 hover:text-black rounded-lg transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -89,6 +90,7 @@ export default function CartDrawer() {
                         <Image
                           src={imageUrl}
                           alt={item.product?.title || "Product Image"}
+                          sizes="64px"
                           fill
                           className="object-cover"
                         />

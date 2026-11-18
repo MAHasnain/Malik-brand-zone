@@ -4,9 +4,9 @@ import { FaFacebook, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 
 export default function Footer() {
     return (
-        <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
+        <footer className="bg-[#f3ece1] border-t border-gray-100 pt-16 pb-8">
             <div className="container mx-auto px-4 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
 
                     {/* Brand & About */}
                     <div>
@@ -34,27 +34,10 @@ export default function Footer() {
                         <h4 className="font-medium text-gray-900 mb-6 tracking-wide uppercase text-sm">Customer Care</h4>
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li><Link href="/contact" className="hover:text-black transition-colors">Contact Us</Link></li>
-                            <li><Link href="/shipping" className="hover:text-black transition-colors">Shipping & Delivery</Link></li>
-                            <li><Link href="/returns" className="hover:text-black transition-colors">Returns & Exchanges</Link></li>
-                            <li><Link href="/faq" className="hover:text-black transition-colors">FAQs</Link></li>
+                            <li><a href="https://wa.me/923172888917" className="hover:text-black">WhatsApp support</a></li>
                         </ul>
                     </div>
 
-                    {/* Newsletter & Contact */}
-                    <div>
-                        <h4 className="font-medium text-gray-900 mb-6 tracking-wide uppercase text-sm">Stay Updated</h4>
-                        <p className="text-gray-500 text-sm mb-4">Subscribe to receive updates, access to exclusive deals, and more.</p>
-                        <form className="flex mb-6">
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                className="flex-1 border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:border-black"
-                            />
-                            <button type="button" className="bg-black text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors">
-                                Subscribe
-                            </button>
-                        </form>
-                    </div>
                 </div>
 
                 <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">

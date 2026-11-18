@@ -10,7 +10,7 @@ export async function getAllCategories(): Promise<ICategory[]> {
     });
     if (!res.ok) throw new Error("Failed to fetch categories");
     const result: ApiResponse<ICategory[]> = await res.json();
-    return result.data || [];
+    return Array.isArray(result.data) ? result.data : [];
   } catch (error) {
     console.error("getAllCategories Error:", error);
     return [];

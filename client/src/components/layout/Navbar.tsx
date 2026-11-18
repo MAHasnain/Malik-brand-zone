@@ -24,13 +24,13 @@ export default function Navbar() {
                     <div className="flex items-center gap-4 flex-1 justify-start">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="lg:hidden p-1 hover:opacity-70 transition-opacity"
+                            className="lg:hidden grid size-11 place-items-center hover:opacity-70 transition-opacity"
                             aria-label="Menu"
                         >
                             <Menu className="h-6 w-6 text-gray-800" />
                         </button>
                         <Link href="/" className="text-2xl font-serif font-bold tracking-widest text-gray-900">
-                            <Image src="/MBZ-black.png" alt="Brand Logo" width={60} height={60} priority />
+                            <Image src="/MBZ-black.png" alt="Malik Brand Zone" width={60} height={60} priority />
                         </Link>
                     </div>
 
@@ -61,7 +61,7 @@ export default function Navbar() {
                             console.log("Cart icon clicked");
                             openCart();
                         }}
-                            className="relative p-1 hover:opacity-70 transition-opacity cursor-pointer" aria-label="Cart">
+                            className="relative grid size-11 shrink-0 place-items-center hover:opacity-70 transition-opacity cursor-pointer" aria-label="Cart">
                             <ShoppingBag className="h-6 w-6 text-gray-800" />
                             {totalItems > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">
@@ -97,11 +97,12 @@ export default function Navbar() {
                             {/* Header */}
                             <div className="flex items-center justify-between p-4 border-b border-gray-100">
                                 <span className="text-xl font-serif font-bold tracking-widest text-gray-900">
-                                    <Image src="/MBZ-black.png" alt="Brand Logo" width={60} height={60} />
+                                    <Image src="/MBZ-black.png" alt="Malik Brand Zone" width={60} height={60} />
                                 </span>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                    aria-label="Close menu"
+                                    className="grid size-11 place-items-center hover:bg-gray-100 rounded-full transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>

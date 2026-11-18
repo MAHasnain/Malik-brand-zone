@@ -4,6 +4,7 @@ export interface ICategory {
   slug: string;
   description?: string;
   image?: string;
+  imageURL?: string;
 }
 
 export interface IProduct {

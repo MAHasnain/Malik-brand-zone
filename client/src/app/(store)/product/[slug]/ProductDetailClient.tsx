@@ -7,7 +7,7 @@ import { useCartStore } from "@/store/useCartStore";
 
 export default function ProductDetailClient({ product }: { product: IProduct }) {
     const addToCart = useCartStore((state) => state.addToCart);
-    const isLoading = useCartStore((state) => state.isLoading);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Dynamic values with strict fallbacks
     const title = product?.title || (product as any)?.name || "Untitled Product";
@@ -28,9 +28,14 @@ export default function ProductDetailClient({ product }: { product: IProduct }) 
             ? product.discountPrice
             : product?.price || 0;
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!product?._id) return;
-        addToCart(product._id, selectedSize, selectedColor, quantity);
+        setIsLoading(true);
+        try {
+            await addToCart(product._id, selectedSize, selectedColor, quantity);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleWhatsAppBuy = () => {
@@ -66,6 +71,7 @@ export default function ProductDetailClient({ product }: { product: IProduct }) 
                                 <Image
                                     src={img}
                                     alt={`${title} thumbnail ${idx + 1}`}
+                                    sizes="80px"
                                     fill
                                     className="object-cover"
                                 />

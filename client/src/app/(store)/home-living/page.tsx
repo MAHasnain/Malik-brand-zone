@@ -17,11 +17,12 @@ export default function HomeLivingPage() {
         setLoading(true);
         setError("");
         
-        const response = await api.get("/products?category=home-living");
-        const resData = response.data as Record<string, any>;
+        const response = await api.get<{ data?: IProduct[] | { products?: IProduct[] }; products?: IProduct[] } | IProduct[]>("/products?category=home-living");
+        const resData = response.data;
 
         // Defensive extraction to ensure array type
-        const fetchedData = resData?.data || resData?.products || resData;
+        const payload = Array.isArray(resData) ? resData : resData?.data ?? resData?.products;
+        const fetchedData = Array.isArray(payload) ? payload : payload?.products;
 
         if (Array.isArray(fetchedData)) {
           setProducts(fetchedData);
@@ -82,7 +83,7 @@ export default function HomeLivingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
