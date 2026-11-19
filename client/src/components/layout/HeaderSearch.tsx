@@ -20,7 +20,7 @@ export default function HeaderSearch() {
             if (query.trim().length >= 2) {
                 setIsLoading(true);
                 const data = await getProducts({ search: query });
-                setResults(data.slice(0, 5)); // Limit top 5 instant results
+                setResults(data.slice(0, 5));
                 setIsLoading(false);
                 setIsOpen(true);
             } else {
@@ -108,7 +108,7 @@ export default function HeaderSearch() {
                             </button>
                         </div>
                     ) : (
-                        <div className="p-4 text-center text-xs text-gray-500">No products found for "{query}"</div>
+                        <div className="p-4 text-center text-xs text-gray-500">No products found for ${"{query}"}</div>
                     )}
                 </div>
             )}

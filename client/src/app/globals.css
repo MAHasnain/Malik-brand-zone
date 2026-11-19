@@ -1,8 +1,101 @@
 @import "tailwindcss";
 
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --paper: #faf5ee;
+  --tint: #f2e8e5;
+  --sale-badge: #743b53;
+  --action-hover: #512a3c;
+  --surface: #fffaf6;
+  --ink: #342731;
+  --muted: #695562;
+  --plum: #69394f;
+  --on-plum: #fff8f3;
+  --line: #dac9cc;
+  --gold: #ad8556;
+  --band: #502e40;
+  --band-ink: #fff6ed;
+  --band-accent: #e9c79b;
+}
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #211b22;
+    --tint: #3b2e38;
+    --sale-badge: #843e5b;
+    --action-hover: #efc5d3;
+    --surface: #302730;
+    --ink: #f5ebe3;
+    --muted: #cbb7c1;
+    --plum: #e1afc0;
+    --on-plum: #321e29;
+    --line: #56434f;
+    --gold: #d7b386;
+    --band: #362633;
+    --band-ink: #faf0e7;
+    --band-accent: #e6c397;
+}
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-brand-paper: var(--paper);
+  --color-brand-surface: var(--surface);
+  --color-brand-ink: var(--ink);
+  --color-brand-muted: var(--muted);
+  --color-brand-primary: var(--plum);
+  --color-brand-champagne: var(--gold);
+}
+
 @layer base {
-  body {
-    background-color: #f9fafb;
-    color: #111827;
+  body { background-color: var(--paper); color: var(--ink); }
+  ::selection { background-color: var(--plum); color: var(--on-plum); }
+  :focus-visible { outline-color: var(--plum); }
+}
+
+/* Existing storefront utilities keep their original meaning for photos,
+   overlays and status messages. Map surfaces, text and actions separately. */
+@layer utilities {
+  .bg-white { background-color: var(--surface); }
+  .bg-white\/80 { background-color: color-mix(in srgb, var(--surface) 88%, transparent); }
+  .bg-gray-50, .bg-neutral-50 { background-color: var(--paper); }
+  .bg-gray-50\/50 { background-color: color-mix(in srgb, var(--surface) 65%, transparent); }
+  .bg-gray-100, .bg-gray-200, .bg-neutral-100 { background-color: var(--tint); }
+
+  .text-black, .text-gray-700, .text-gray-800, .text-gray-900, .text-neutral-950 { color: var(--ink); }
+  .text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, .text-neutral-700 { color: var(--muted); }
+  .border-gray-100, .border-gray-200, .border-gray-300, .border-neutral-400 { border-color: var(--line); }
+  .divide-gray-50 > :not(:last-child) { border-color: var(--line); }
+  .border-black { border-color: var(--plum); }
+  .accent-black { accent-color: var(--plum); }
+
+  .bg-black, .bg-neutral-950 { background-color: var(--plum); color: var(--on-plum); }
+  .bg-black .bg-white { background-color: var(--on-plum); }
+  .bg-red-600 { background-color: var(--sale-badge); color: #fff8f3; }
+  .text-red-600 { color: var(--plum); }
+  .bg-red-100, .bg-red-50 { background-color: var(--tint); }
+  .border-red-100 { border-color: var(--line); }
+
+  .focus\:bg-white:focus { background-color: var(--surface); }
+  .focus\:border-black:focus, .focus-visible\:outline-neutral-900:focus-visible { --tw-outline-color: var(--plum); }
+  .focus\:border-black:focus { border-color: var(--plum); }
+  .focus-visible\:outline-neutral-900:focus-visible { outline-color: var(--plum); }
+
+  @media (hover: hover) {
+    .hover\:bg-gray-100:hover, .hover\:bg-gray-50:hover { background-color: var(--tint); }
+    .hover\:bg-gray-800:hover, .hover\:bg-neutral-800:hover { background-color: var(--action-hover); }
+    .hover\:text-black:hover, .hover\:text-red-700:hover, .hover\:text-gray-500:hover, .hover\:text-gray-600:hover { color: var(--plum); }
+    .hover\:border-black:hover, .hover\:border-neutral-950:hover, .group:hover .group-hover\:border-black { border-color: var(--plum); }
   }
 }
+
+/* Subtle champagne rules tie the header and footer to the trust section. */
+header.sticky { border-bottom-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
+footer.bg-white { background-color: var(--tint); border-top-color: var(--gold); }
+footer input { background-color: var(--surface); color: var(--ink); }
+:root[data-theme="dark"] img:is([src="/MBZ-black.png"], [src*="MBZ-black.png?"] , [src*="MBZ-black.png&"]) { filter: invert(1); mix-blend-mode: screen; }
+:root[data-theme="dark"] .text-red-700 { color: #f1adba; }
+.mbz-theme-toggle { width: 44px; height: 44px; flex: none; display: grid; place-items: center; color: var(--plum); border-radius: 50%; }
+.mbz-theme-toggle:hover { background: var(--tint); }
+.mbz-when-dark, :root[data-theme="dark"] .mbz-when-light { display: none; }
+:root[data-theme="dark"] .mbz-when-dark { display: inline-flex; }
