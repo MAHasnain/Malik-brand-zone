@@ -4,6 +4,7 @@ import { api } from "@/lib/axios";
 import { IProduct } from "@/types";
 
 export interface ICartItem {
+  _id?: string;
   product: IProduct;
   size: string;
   color: string;
@@ -18,6 +19,7 @@ interface CartStoreState {
   } | null;
   loading: boolean;
   isOpen: boolean;
+  fetchCart: () => Promise<void>;
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
@@ -30,6 +32,22 @@ interface CartStoreState {
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
+}
+
+type Cart = NonNullable<CartStoreState["cart"]>;
+type ApiCart = Omit<Cart, "items"> & {
+  items: (ICartItem & { selectedSize?: string; selectedColor?: string })[];
+};
+
+function normalizeCart(cart: ApiCart): Cart {
+  return {
+    ...cart,
+    items: cart.items.map(item => ({
+      ...item,
+      size: item.selectedSize ?? item.size ?? "",
+      color: item.selectedColor ?? item.color ?? "",
+    })),
+  };
 }
 
 const getOrCreateSessionId = (): string => {
@@ -46,6 +64,19 @@ export const useCartStore = create<CartStoreState>((set) => ({
   cart: null,
   loading: false,
   isOpen: false, // Default hidden
+
+  fetchCart: async () => {
+    const sessionId = window.localStorage.getItem("cart_session_id");
+    if (!sessionId) return;
+    try {
+      const { data } = await api.get<{ data: ApiCart }>("/cart", { params: { sessionId } });
+      const cart = normalizeCart(data.data);
+      // A mutation that completed during restoration has the newer cart.
+      set(state => state.cart === null ? { cart } : state);
+    } catch (error) {
+      console.error("Could not restore cart:", error);
+    }
+  },
 
   openCart: () => set({ isOpen: true }),
   closeCart: () => set({ isOpen: false }),
@@ -80,7 +111,7 @@ export const useCartStore = create<CartStoreState>((set) => ({
 
       const resData = response.data as Record<string, any>;
       if (resData?.data) {
-        set({ cart: resData.data, isOpen: true }); // Automatically open drawer after adding!
+        set({ cart: normalizeCart(resData.data), isOpen: true }); // Automatically open drawer after adding!
       }
     } catch (error: unknown) {
       console.error("Error adding to cart:", error);
@@ -90,9 +121,9 @@ export const useCartStore = create<CartStoreState>((set) => ({
   updateQuantity: async (itemId: string, quantity: number) => {
     try {
       const sessionId = getOrCreateSessionId();
-      const response = await api.put("/cart/update", { itemId, quantity, sessionId });
+      const response = await api.patch("/cart/update-qty", { itemId, quantity, sessionId });
       const resData = response.data as Record<string, any>;
-      if (resData?.data) set({ cart: resData.data });
+      if (resData?.data) set({ cart: normalizeCart(resData.data) });
     } catch (error: unknown) {
       console.error("Error updating cart quantity:", error);
     }
@@ -103,7 +134,16 @@ export const useCartStore = create<CartStoreState>((set) => ({
       const sessionId = getOrCreateSessionId();
       const response = await api.post("/cart/remove", { itemId, sessionId });
       const resData = response.data as Record<string, any>;
-      if (resData?.data) set({ cart: resData.data });
+      if (resData?.data) {
+        set(state => state.cart ? {
+          cart: {
+            ...state.cart,
+            items: state.cart.items.filter(item => item._id !== itemId),
+            totalItems: resData.data.totalItems,
+            totalPrice: resData.data.totalPrice,
+          },
+        } : state);
+      }
     } catch (error: unknown) {
       console.error("Error removing item from cart:", error);
     }

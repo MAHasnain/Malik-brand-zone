@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 import { useCartStore, ICartItem } from "@/store/useCartStore";
 
@@ -146,20 +147,16 @@ export default function CartDrawer() {
               <div className="p-5 border-t border-gray-100 bg-white">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    Total
+                    Subtotal
                   </span>
                   <span className="text-lg font-serif font-bold text-black">
                     Rs. {totalPrice.toLocaleString()}
                   </span>
                 </div>
-                <button
-                  onClick={() => {
-                    alert("Proceeding to Checkout");
-                  }}
-                  className="w-full bg-black text-white text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl hover:bg-gray-800 transition"
-                >
-                  Checkout
-                </button>
+                <Link href="/checkout" onClick={closeCart}
+                  className="block w-full rounded-xl bg-black py-3.5 text-center text-xs font-bold uppercase tracking-widest text-white hover:bg-gray-800">
+                  Proceed to checkout
+                </Link>
               </div>
             )}
           </motion.div>
