@@ -30,19 +30,44 @@ export const createProduct = asyncHandler(
    throw new ApiError(400, "Product slug already exists");
   }
 
-  // 3. Handle Image Uploads concurrently
-  const imageUrls: string[] = [];
-  if (req.files && Array.isArray(req.files)) {
-   const uploadPromises = req.files.map((file) =>
-    uploadToCloudinary(file.buffer, "Products"),
-   );
-   const results = await Promise.all(uploadPromises);
-   imageUrls.push(...results);
-  }
-
-  if (imageUrls.length === 0) {
+  const files = Array.isArray(req.files) ? req.files : [];
+  const urls: unknown = req.body.images ?? [];
+  if (!Array.isArray(urls))
+   throw new ApiError(400, "Invalid product image list");
+  if (urls.length + files.length === 0)
    throw new ApiError(400, "At least one product image is required");
-  }
+  if (urls.length + files.length > 3)
+   throw new ApiError(400, "Choose up to 3 product images");
+
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  if (urls.length && !cloudName)
+   throw new ApiError(500, "Image storage is not configured");
+  const imageUrls = urls.map((value: unknown): string => {
+   const invalid = () =>
+    new ApiError(400, "Choose a product image uploaded to the store");
+   if (typeof value !== "string") throw invalid();
+   let url: URL;
+   try {
+    url = new URL(value);
+   } catch {
+    throw invalid();
+   }
+   const prefix = `/${cloudName}/image/upload/`;
+   if (
+    url.origin !== "https://res.cloudinary.com" ||
+    url.username ||
+    url.password ||
+    !url.pathname.startsWith(prefix) ||
+    url.pathname.length <= prefix.length
+   )
+    throw invalid();
+   return url.href;
+  });
+  imageUrls.push(
+   ...(await Promise.all(
+    files.map((file) => uploadToCloudinary(file.buffer, "Products")),
+   )),
+  );
 
   // 4. Parse FormData Strings back to proper JS Types (Arrays, Numbers, Booleans)
   const parsedSizes =

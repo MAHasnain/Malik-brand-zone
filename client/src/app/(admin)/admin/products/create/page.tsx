@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { isAxiosError } from "axios";
 import Image from "next/image";
 import { ICategory } from "@/types";
 import { getAllCategories } from "@/services/category.api";
@@ -59,6 +61,11 @@ export default function CreateProductPage() {
   const handleDeviceImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    if (files.length + uploadedImages.length > 3) {
+      toast.error("Choose up to 3 product images.");
+      e.target.value = "";
+      return;
+    }
 
     setUploadingImages(true);
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dkqip1ihc";
@@ -79,16 +86,18 @@ export default function CreateProductPage() {
         });
 
         const data = await res.json();
-        if (data.secure_url) {
-          newUrls.push(data.secure_url);
+        if (!res.ok || typeof data.secure_url !== "string") {
+          throw new Error(data.error?.message || "Image upload failed.");
         }
+        newUrls.push(data.secure_url);
       }
 
-      setUploadedImages((prev) => [...prev, ...newUrls]);
+
     } catch (error) {
       console.error("Cloudinary Direct Upload Failed:", error);
-      alert("Failed to upload image from device.");
+      toast.error(error instanceof Error ? error.message : "Image upload failed.");
     } finally {
+      setUploadedImages(prev => [...prev, ...newUrls]);
       setUploadingImages(false);
     }
   };
@@ -100,12 +109,12 @@ export default function CreateProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price || !category) {
-      alert("Please fill all required fields (Title, Price, Category)");
+      toast.error("Please fill all required fields (Title, Price, Category)");
       return;
     }
 
     if (uploadedImages.length === 0) {
-      alert("Please upload at least one image of the product.");
+      toast.error("Please upload at least one image of the product.");
       return;
     }
 
@@ -126,11 +135,11 @@ export default function CreateProductPage() {
         isFeatured: true,
       });
 
-      alert("Product published successfully!");
+      toast.success("Product published successfully!");
       router.push("/admin/products");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create product:", error);
-      alert(error.response?.data?.message || "Error creating product");
+      toast.error(isAxiosError(error) ? error.response?.data?.message || "Error creating product" : "Error creating product");
     } finally {
       setLoading(false);
     }
