@@ -11,19 +11,18 @@ import { protectAdmin } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// Base Routes (/api/categories)
 router
  .route("/")
  .get(getAllCategories)
  .post(protectAdmin, createCategory);
 
-// Slug specific route MUST be defined before /:id to prevent Express from treating "slug" as an ID
 router.route("/slug/:slug").get(getCategoryBySlug);
 
 // ID specific routes (/api/categories/:id)
 router
  .route("/:id")
  .get(getCategoryById)
+ .put(protectAdmin, updateCategory)
  .patch(protectAdmin, updateCategory)
  .delete(protectAdmin, deleteCategory);
 
