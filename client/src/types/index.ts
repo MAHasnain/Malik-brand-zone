@@ -41,6 +41,17 @@ export interface ICart {
   totalItems: number;
 }
 
+export interface IOrder {
+  _id: string;
+  userId: string;
+  items: ICartItem[];
+  totalPrice: number;
+  totalItems: number;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ApiResponse<T> {
   statusCode: number;
   data: T;
