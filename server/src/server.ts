@@ -5,6 +5,7 @@ import { connectDB } from "./config/db";
 import logger from "./logger/winston.logger";
 
 // Route Imports
+import bannerRoutes from "./routes/bannerRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import authRoutes from "./routes/authRoutes";
 import productRoutes from "./routes/productRoutes";
@@ -52,6 +53,7 @@ app.use(
 
 // Mount API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/banners", bannerRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes)
