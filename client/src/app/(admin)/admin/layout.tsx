@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
-import AdminShell from "./AdminShell";
+import AdminSessionGuard from "./AdminSessionGuard";
+import AdminSidebarWrapper from "./AdminSidebarWrapper";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <AdminSessionGuard>
+      <AdminSidebarWrapper>{children}</AdminSidebarWrapper>
+    </AdminSessionGuard>
+  );
 }
