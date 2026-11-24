@@ -5,20 +5,23 @@ import ProductCard from "./ProductCard";
 import { getProducts } from "@/services/product.api";
 import styles from "./HomeSections.module.css";
 
-export default async function TrendingProducts() {
-  const products = await getProducts({ limit: 8 });
+export default async function TrendingProducts({ bedding = false }: { bedding?: boolean } = {}) {
+  const title = bedding ? "Bed Sheets & Comforters" : "New Arrivals";
+  const href = bedding ? "/home-living#comforters-and-bed-sheets" : "/new-arrivals";
+  const headingId = bedding ? "bedding-heading" : "new-arrivals-heading";
+  const products = await getProducts(bedding ? { category: "comforters-and-bed-sheets", limit: 8 } : { limit: 8 });
   return (
-    <section className={styles.arrivals} aria-labelledby="new-arrivals-heading">
+    <section className={styles.arrivals} aria-labelledby={headingId}>
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <h2 id="new-arrivals-heading" className={styles.heading}>New Arrivals</h2>
-            <p className={styles.intro}>Handpicked selections for the season.</p>
+            <h2 id={headingId} className={styles.heading}>{title}</h2>
+            {!bedding && <p className={styles.intro}>Handpicked selections for the season.</p>}
           </div>
-          <Link href="/new-arrivals" className={styles.desktopLink}>View All</Link>
+          <Link href={href} className={styles.desktopLink}>View All</Link>
         </header>
         {Array.isArray(products) && products.length > 0 ? (
-          <ArrivalRail>
+          <ArrivalRail id={bedding ? "bedding-products" : "arrival-products"} label={title}>
             {products.map((product, index) => (
               <motion.li key={product._id} className={styles.card}
                 initial={false}
@@ -30,10 +33,11 @@ export default async function TrendingProducts() {
             ))}
           </ArrivalRail>
         ) : (
-          <p className={styles.empty}>No new arrivals available right now.</p>
+          <p className={styles.empty}>{bedding ? "No bedding products available yet." : "No new arrivals available right now."}</p>
         )}
-        <Link href="/new-arrivals" className={styles.mobileLink}>View All Arrivals</Link>
+        <Link href={href} className={styles.mobileLink}>{bedding ? "View All Bedding" : "View All Arrivals"}</Link>
       </div>
     </section>
   );
 }
+

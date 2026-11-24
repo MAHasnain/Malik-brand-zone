@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import styles from "./HomeSections.module.css";
 
-export default function ArrivalRail({ children }: { children: ReactNode }) {
+export default function ArrivalRail({ children, id = "arrival-products", label = "New Arrivals" }: { children: ReactNode; id?: string; label?: string }) {
   const list = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
 
@@ -32,13 +32,14 @@ export default function ArrivalRail({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.railWrap}>
-      <ul ref={list} className={styles.rail} id="arrival-products" aria-label="New Arrivals">{children}</ul>
+      <ul ref={list} className={styles.rail} id={id} aria-label={label}>{children}</ul>
       {!(edges.start && edges.end) && (
         <div className={styles.controls}>
-          <button type="button" disabled={edges.start} onClick={() => move(-1)} aria-label="Previous products" aria-controls="arrival-products"><ArrowLeft size={18} /></button>
-          <button type="button" disabled={edges.end} onClick={() => move(1)} aria-label="Next products" aria-controls="arrival-products"><ArrowRight size={18} /></button>
+          <button type="button" disabled={edges.start} onClick={() => move(-1)} aria-label="Previous products" aria-controls={id}><ArrowLeft size={18} /></button>
+          <button type="button" disabled={edges.end} onClick={() => move(1)} aria-label="Next products" aria-controls={id}><ArrowRight size={18} /></button>
         </div>
       )}
     </div>
   );
 }
+

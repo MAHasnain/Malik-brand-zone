@@ -1,46 +1,22 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Home as HomeIcon } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
-import { IProduct } from "@/types";
-import { api } from "@/lib/axios";
-import { Loader2, Home as HomeIcon } from "lucide-react";
+import { getProducts } from "@/services/product.api";
 
-export default function HomeLivingPage() {
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const slug = "comforters-and-bed-sheets";
 
-  useEffect(() => {
-    const fetchHomeLivingProducts = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        
-        const response = await api.get("/products?category=home-living");
-        const resData = response.data as Record<string, any>;
-
-        // Defensive extraction to ensure array type
-        const fetchedData = resData?.data || resData?.products || resData;
-
-        if (Array.isArray(fetchedData)) {
-          setProducts(fetchedData);
-        } else {
-          setProducts([]); // Fallback to empty array
-        }
-      } catch (err: unknown) {
-        console.error("Error fetching Home & Living products:", err);
-        setProducts([]); // Prevent crash on error response
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHomeLivingProducts();
-  }, []);
-
+export default async function HomeLivingPage({ searchParams }: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const value = Number((await searchParams).page);
+  const page = Number.isSafeInteger(value) && value > 0 ? value : 1;
+  const [bedding, home] = await Promise.all([
+    getProducts({ category: slug, page, limit: 12 }),
+    getProducts({ category: "home-living" }),
+  ]);
+  const next = bedding.length === 12 ? await getProducts({ category: slug, page: page + 1, limit: 12 }) : [];
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-paper">
       {/* Hero Banner */}
       <section className="bg-gray-50 border-b border-gray-100 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -56,40 +32,26 @@ export default function HomeLivingPage() {
         </div>
       </section>
 
-      {/* Main Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-black mb-3" />
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-              Loading Products...
-            </p>
-          </div>
-        ) : !Array.isArray(products) || products.length === 0 ? (
-          /* Zero Products Found State */
-          <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-            <HomeIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-gray-900">0 Products Found</h3>
-            <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-              We are currently updating our Home & Living stock. Check back soon for new arrivals!
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Showing {products.length} Products
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
+      <section id={slug} aria-labelledby="bedding-title" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-12 lg:px-8">
+        <h2 id="bedding-title" className="mb-6 font-serif text-3xl">Comforters and Bed Sheets</h2>
+        {bedding.length ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+            {bedding.map(product => <ProductCard key={product._id} product={product} />)}
           </div>
+        ) : <p>No bedding products available on this page.</p>}
+        {(page > 1 || next.length > 0) && (
+          <nav aria-label="Bedding pages" className="mt-6 flex gap-4">
+            {page > 1 && <Link className="p-3 underline" href={`/home-living?page=${page - 1}#${slug}`}>Previous</Link>}
+            {next.length > 0 && <Link className="p-3 underline" href={`/home-living?page=${page + 1}#${slug}`}>Next</Link>}
+          </nav>
         )}
       </section>
+      {home.length > 0 && (
+        <section aria-label="Home & Living products" className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 pb-12 md:grid-cols-3 lg:grid-cols-4 lg:px-8">
+          {home.map(product => <ProductCard key={product._id} product={product} />)}
+        </section>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Image from "next/image";
 import { createCategoryApi } from "@/services/admin.api";
 
@@ -45,12 +46,11 @@ export default function CreateCategoryPage() {
       });
 
       const data = await res.json();
-      if (data.secure_url) {
-        setImageUrl(data.secure_url);
-      }
+      if (!res.ok || typeof data.secure_url !== "string") throw new Error("Upload failed");
+      setImageUrl(data.secure_url);
     } catch (error) {
       console.error("Cloudinary Upload Failed:", error);
-      alert("Failed to upload image from device.");
+      toast.error("Failed to upload image from device.");
     } finally {
       setUploadingImage(false);
     }
@@ -59,7 +59,7 @@ export default function CreateCategoryPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) {
-      alert("Please enter Category Name");
+      toast.warning("Please enter Category Name");
       return;
     }
 
@@ -71,11 +71,14 @@ export default function CreateCategoryPage() {
         image: imageUrl || undefined,
       });
 
-      alert("Category created successfully!");
+      toast.success("Category created successfully!");
       router.push("/admin/categories");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create category:", error);
-      alert(error.response?.data?.message || "Error creating category");
+      const response = error && typeof error === "object" && "response" in error ? error.response : undefined;
+      const data = response && typeof response === "object" && "data" in response ? response.data : undefined;
+      const message = data && typeof data === "object" && "message" in data ? data.message : undefined;
+      toast.error(typeof message === "string" ? message : "Error creating category");
     } finally {
       setLoading(false);
     }
