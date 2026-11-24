@@ -14,6 +14,8 @@ export default function Home() {
       {/* 3. New Arrivals / Trending Grid */}
       <TrendingProducts />
 
+      <TrendingProducts bedding />
+
       {/* 4. Brand Value Proposition */}
       <section className="bg-gray-50 py-16 border-t border-gray-100">
         <div className="container mx-auto px-4 text-center">

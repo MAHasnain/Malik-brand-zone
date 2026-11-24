@@ -7,6 +7,27 @@ import { ApiResponse } from "../utils/ApiResponse";
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
 
+const MAX_BANNERS = 4;
+const limitMessage = "Four banners are already published. Remove one before uploading another.";
+let slotIndex: Promise<string> | undefined;
+
+async function availableSlots() {
+ // Explicit creation also covers production databases with autoIndex disabled.
+ slotIndex ??= HeroBanner.collection.createIndex({ slot: 1 }, { unique: true, sparse: true })
+  .catch(error => { slotIndex = undefined; throw error; });
+ await slotIndex;
+ const rows = await HeroBanner.find({}).select("slot").lean();
+ const legacy = rows.filter(row => row.slot == null).length;
+ const occupied = new Set(rows.map(row => row.slot));
+ return Array.from({ length: MAX_BANNERS }, (_, i) => i)
+  .filter(i => i >= legacy && !occupied.has(i));
+}
+
+function isOccupiedSlot(error: unknown) {
+ const duplicate = error as { code?: number; keyPattern?: { slot?: number } } | null;
+ return duplicate?.code === 11000 && duplicate.keyPattern?.slot === 1;
+}
+
 export const listBanners = asyncHandler(
  async (_req: Request, res: Response) => {
   const banners = await HeroBanner.find({})
@@ -29,6 +50,9 @@ export const publishBanner = asyncHandler(
   if (file.size > 4 * 1024 * 1024)
    throw new ApiError(413, "Maximum image size is 4 MB.");
 
+  const slots = await availableSlots();
+  if (!slots.length) throw new ApiError(409, limitMessage);
+
   const asset = await new Promise<{ imageUrl: string; publicId: string }>(
    (resolve, reject) => {
     cloudinary.uploader
@@ -50,7 +74,15 @@ export const publishBanner = asyncHandler(
 
   let banner;
   try {
-   banner = await HeroBanner.create(asset);
+   for (const slot of slots) {
+    try {
+     banner = await HeroBanner.create({ ...asset, slot });
+     break;
+    } catch (error) {
+     if (!isOccupiedSlot(error)) throw error;
+    }
+   }
+   if (!banner) throw new ApiError(409, limitMessage);
   } catch (error) {
    await deleteFromCloudinary(asset.publicId);
    throw error;

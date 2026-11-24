@@ -1,18 +1,22 @@
 import Link from "next/link";
 
+import BannerSlideshow from "../layout/BannerSlideshow";
+import { publishedBanners } from "@/services/admin.api";
+
 const collectionPhoto =
   "https://images.unsplash.com/photo-1490481651871-ab68de25d43d";
 
-export default function Hero() {
+export default async function Hero() {
+  const images = await publishedBanners();
   return (
     <section
       aria-labelledby="collection-heading"
       className="grid bg-white text-neutral-950 md:grid-cols-[5fr_6fr]"
     >
       <div
-        aria-hidden="true"
         className="relative h-[clamp(10rem,25svh,16rem)] overflow-hidden bg-neutral-100 md:col-start-2 md:row-start-1 md:h-auto"
       >
+        <BannerSlideshow key={JSON.stringify(images)} images={images}>
         <picture>
           <source
             media="(min-width: 768px)"
@@ -30,6 +34,7 @@ export default function Hero() {
             className="absolute inset-0 size-full object-cover object-[center_55%]"
           />
         </picture>
+        </BannerSlideshow>
       </div>
 
       <div className="flex flex-col items-start justify-center px-5 py-7 sm:px-10 md:col-start-1 md:row-start-1 md:min-h-[26rem] md:px-[5vw] md:py-12 xl:min-h-[32rem]">
