@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
       document.cookie = `accessToken=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
 
       if (res.status === 200 || res.status === 201) {
-        router.push("/admin/products");
+        router.push("/admin");
       }
 
     } catch (error: unknown) {

@@ -264,7 +264,6 @@ export const getProductBySlug = asyncHandler(
 );
 
 // 5. UPDATE PRODUCT
-// 5. UPDATE PRODUCT
 export const updateProduct = asyncHandler(
  async (req: Request, res: Response) => {
   const product = await Product.findById(req.params.id);
@@ -297,55 +296,77 @@ export const updateProduct = asyncHandler(
 
   // 2. Parse FormData Strings back to proper JS Types
   const parsedSizes =
-   typeof sizes === "string" ? sizes.split(",").map((s) => s.trim()) : sizes;
+   typeof sizes === "string"
+    ? sizes
+       .split(",")
+       .map((s) => s.trim())
+       .filter(Boolean)
+    : sizes;
   const parsedColors =
-   typeof colors === "string" ? colors.split(",").map((c) => c.trim()) : colors;
+   typeof colors === "string"
+    ? colors
+       .split(",")
+       .map((c) => c.trim())
+       .filter(Boolean)
+    : colors;
 
-  // 3. Image Management Logic
-  let finalImages: string[] = [];
+  const fields: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries({
+   title,
+   slug,
+   description,
+   fabric,
+   category,
+   sizes: parsedSizes,
+   colors: parsedColors,
+  })) {
+   if (value !== undefined) fields[key] = value;
+  }
+  for (const [key, value] of Object.entries({ price, stock, discountPrice })) {
+   if (
+    value === undefined ||
+    (key === "discountPrice" && (value === "" || value === null))
+   )
+    continue;
+   const amount = Number(value);
+   if (
+    value === "" ||
+    !Number.isFinite(amount) ||
+    amount < 0 ||
+    (key === "stock" && !Number.isInteger(amount))
+   ) {
+    throw new ApiError(400, "Invalid " + key);
+   }
+   fields[key] = amount;
+  }
+  if (isFeatured !== undefined)
+   fields.isFeatured = isFeatured === true || isFeatured === "true";
 
-  // A. Add retained existing images
-  if (retainedImages) {
-   finalImages = Array.isArray(retainedImages)
+  const files = Array.isArray(req.files) ? req.files : [];
+  if (retainedImages !== undefined || files.length) {
+   const keep: unknown[] = Array.isArray(retainedImages)
     ? retainedImages
-    : [retainedImages];
-  }
-
-  // B. Upload and append any brand NEW images
-  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-   const uploadPromises = req.files.map((file) =>
-    uploadToCloudinary(file.buffer, "Products"),
+    : retainedImages
+      ? [retainedImages]
+      : [];
+   if (
+    keep.some((url) => typeof url !== "string" || !product.images.includes(url))
+   ) {
+    throw new ApiError(400, "Retained image does not belong to this product");
+   }
+   if (keep.length + files.length < 1 || keep.length + files.length > 3) {
+    throw new ApiError(400, "Choose between one and three product images");
+   }
+   const uploaded = await Promise.all(
+    files.map((file) => uploadToCloudinary(file.buffer, "Products")),
    );
-   const newImageUrls = await Promise.all(uploadPromises);
-   finalImages = [...finalImages, ...newImageUrls];
+   fields.images = [...keep, ...uploaded];
   }
-
-  // C. Fallback: If no files were uploaded and no retainedImages array was sent, keep original images
-  if (finalImages.length === 0 && (!req.files || req.files.length === 0)) {
-   finalImages = product.images;
-  }
-
-  if (finalImages.length === 0) {
-   throw new ApiError(400, "A product must have at least one image");
-  }
-
-  // 4. Construct updated payload (fallback to existing values if not provided in request)
   const updatedData = {
-   title: title || product.title,
-   slug: slug || product.slug,
-   description: description || product.description,
-   price: price ? Number(price) : product.price,
-   discountPrice: discountPrice ? Number(discountPrice) : product.discountPrice,
-   category: category || product.category,
-   fabric: fabric || product.fabric,
-   sizes: parsedSizes || product.sizes,
-   colors: parsedColors || product.colors,
-   stock: stock !== undefined ? Number(stock) : product.stock,
-   isFeatured:
-    isFeatured !== undefined
-     ? isFeatured === "true" || isFeatured === true
-     : product.isFeatured,
-   images: finalImages,
+   $set: fields,
+   ...(discountPrice === "" || discountPrice === null
+    ? { $unset: { discountPrice: 1 } }
+    : {}),
   };
 
   const updatedProduct = await Product.findByIdAndUpdate(
@@ -357,6 +378,7 @@ export const updateProduct = asyncHandler(
    },
   ).populate("category", "name slug");
 
+  if (!updatedProduct) throw new ApiError(404, "Product not found");
   res
    .status(200)
    .json(new ApiResponse(200, updatedProduct, "Product updated successfully"));

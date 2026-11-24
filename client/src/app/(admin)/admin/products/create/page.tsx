@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { isAxiosError } from "axios";
 import Image from "next/image";
 import { ICategory } from "@/types";
 import { getAllCategories } from "@/services/category.api";
 import { createProductApi } from "@/services/admin.api";
 
-const AVAILABLE_SIZES = ["S", "M", "L", "XL", "Unstitched", "Standard"];
+const AVAILABLE_SIZES = ["S", "M", "L", "XL", "Single", "Queen", "King", "Unstitched", "Standard"];
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -27,7 +26,7 @@ export default function CreateProductPage() {
   const [fabric, setFabric] = useState("");
   const [stock, setStock] = useState("10");
   const [selectedSizes, setSelectedSizes] = useState<string[]>(["Standard"]);
-  
+
   // Array storing uploaded Cloudinary URLs automatically
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
@@ -139,7 +138,10 @@ export default function CreateProductPage() {
       router.push("/admin/products");
     } catch (error: unknown) {
       console.error("Failed to create product:", error);
-      toast.error(isAxiosError(error) ? error.response?.data?.message || "Error creating product" : "Error creating product");
+      const response = error && typeof error === "object" && "response" in error ? error.response : undefined;
+      const data = response && typeof response === "object" && "data" in response ? response.data : undefined;
+      const message = data && typeof data === "object" && "message" in data ? data.message : undefined;
+      toast.error(typeof message === "string" ? message : "Error creating product");
     } finally {
       setLoading(false);
     }
@@ -252,9 +254,8 @@ export default function CreateProductPage() {
                   key={sz}
                   type="button"
                   onClick={() => toggleSize(sz)}
-                  className={`px-4 py-1.5 text-xs font-bold border rounded transition ${
-                    selected ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-200"
-                  }`}
+                  className={`px-4 py-1.5 text-xs font-bold border rounded transition ${selected ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-200"
+                    }`}
                 >
                   {sz}
                 </button>
@@ -266,7 +267,7 @@ export default function CreateProductPage() {
         {/* 🚀 DEVICE IMAGE UPLOAD SECTION */}
         <div>
           <label className="block text-xs font-semibold uppercase text-gray-700 mb-2">Product Images *</label>
-          
+
           <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer relative mb-4">
             <input
               type="file"

@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+import EditProductDialog from "./EditProductDialog";
+import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { IProduct } from "@/types";
 import { getProducts } from "@/services/product.api";
 import { deleteProductApi } from "@/services/admin.api";
-import { api } from "@/lib/axios";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<IProduct | null>(null);
   const router = useRouter();
 
 
@@ -41,32 +44,47 @@ export default function AdminProductsPage() {
     fetchCatalog();
   }, [router]);
 
-  const handleDelete = async (id: string, title: string) => {
-    if (confirm(`Are you sure you want to delete "${title}"?`)) {
-      try {
-        await deleteProductApi(id);
-        setProducts((prev) => prev.filter((item) => item._id !== id));
-      } catch (err) {
-        alert("Failed to delete product.");
-      }
-    }
-  };
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [selected, setSelected] = useState<IProduct | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-const handleLogout = async () => {
-  try {
-    await api.post("/auth/logout"); 
-  } catch (error) {
-    console.error("Logout error:", error);
-  } finally {
-    localStorage.removeItem("accessToken");
-    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-    document.cookie = "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-    router.push("/admin/login");
+  async function deleteSelected() {
+    if (!selected || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteProductApi(selected._id);
+      setProducts(current => current.filter(item => item._id !== selected._id));
+      dialog.current?.close();
+      toast.success("Product deleted.");
+    } catch {
+      dialog.current?.close();
+      toast.error("Failed to delete product.");
+    } finally {
+      setDeleting(false);
+    }
   }
-};
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <dialog ref={dialog} aria-labelledby="delete-product-heading"
+        onCancel={event => { if (deleting) event.preventDefault(); }}
+        onClose={() => setSelected(null)}
+        className="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-xl border border-(--line) bg-brand-surface p-6 text-brand-ink backdrop:bg-black/50">
+        <h2 id="delete-product-heading" className="text-lg font-semibold">Delete product?</h2>
+        <p className="my-4 wrap-break-word">Delete “{selected?.title}” from your catalog?</p>
+        <div className="flex justify-end gap-3">
+          <button autoFocus type="button" disabled={deleting} onClick={() => dialog.current?.close()}
+            className="min-h-11 rounded-lg border px-4">Cancel</button>
+          <button type="button" disabled={deleting} onClick={deleteSelected}
+            className="min-h-11 rounded-lg bg-red-700 px-4 text-white">
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
+        </div>
+      </dialog>
+      {editing && <EditProductDialog product={editing} onClose={() => setEditing(null)} onSaved={updated => {
+        setProducts(current => current.map(item => item._id === updated._id ? updated : item));
+        setEditing(null);
+      }} />}
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-200">
         <div>
@@ -81,12 +99,6 @@ const handleLogout = async () => {
           >
             + Add New Product
           </Link>
-          <button
-            onClick={handleLogout}
-            className="text-xs font-semibold text-red-600 border border-red-200 bg-red-50 px-4 py-3 rounded-lg hover:bg-red-100 transition"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
@@ -106,8 +118,8 @@ const handleLogout = async () => {
       ) : (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-500 font-semibold uppercase tracking-wider border-b border-gray-100">
+            <table className="block w-full text-left text-xs md:table">
+              <thead className="hidden md:table-header-group bg-gray-50 text-gray-500 font-semibold uppercase tracking-wider border-b border-gray-100">
                 <tr>
                   <th className="py-3.5 px-4">Item</th>
                   <th className="py-3.5 px-4">Category</th>
@@ -116,15 +128,15 @@ const handleLogout = async () => {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
+              <tbody className="block md:table-row-group divide-y divide-gray-100 font-medium text-gray-700">
                 {products.map((item) => (
-                  <tr key={item._id} className="hover:bg-gray-50/50 transition">
+                  <tr key={item._id} className="grid grid-cols-2 items-center md:table-row hover:bg-gray-50/50 transition [&>td:first-child]:col-span-2 [&>td:last-child]:col-span-2">
                     <td className="py-3 px-4 flex items-center gap-3">
                       <div className="relative w-10 h-12 bg-gray-100 rounded overflow-hidden shrink-0">
                         <Image
                           src={item.images?.[0] || "/placeholder.png"}
                           alt={item.title || "Product"}
-                          fill
+                          fill sizes="40px"
                           className="object-cover"
                         />
                       </div>
@@ -136,7 +148,7 @@ const handleLogout = async () => {
                       {item.category?.name || "General"}
                     </td>
                     <td className="py-3 px-4 font-bold text-gray-900">
-                      PKR {(item.discountPrice || item.price).toLocaleString()}
+                      PKR {(item.discountPrice ?? item.price).toLocaleString()}
                     </td>
                     <td className="py-3 px-4">
                       <span
@@ -147,12 +159,21 @@ const handleLogout = async () => {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleDelete(item._id, item.title)}
-                        className="text-red-600 hover:text-red-800 font-semibold transition text-xs"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setEditing(item)} aria-label={`Edit ${item.title}`}
+                          className="inline-flex min-h-11 items-center gap-1 rounded-lg border px-3">
+                          <Pencil size={16} aria-hidden="true" /> Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelected(item);
+                            dialog.current?.showModal();
+                          }}
+                          type="button" aria-label={`Delete ${item.title}`} className="inline-flex min-h-11 items-center gap-1 rounded-lg border px-3 text-red-600"
+                        >
+                          <Trash2 size={16} aria-hidden="true" /> Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
